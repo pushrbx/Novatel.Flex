@@ -13,4 +13,13 @@ namespace Novatel.Flex
             
         }
     }
+
+    public class NovatelNetworkException : Exception
+    {
+        public NovatelNetworkException(string msg)
+            : base(msg)
+        {
+
+        }
+    }
 }

@@ -29,6 +29,7 @@ namespace Novatel.Flex
             m_isRunning = true;
 
             var stream = m_tcpClient.GetStream();
+            // todo: start a new thread.
         }
     }
 }
