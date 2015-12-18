@@ -39,10 +39,33 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\BestPosition.cs" />
     <Compile Include="DeviceClient.cs" />
+    <Compile Include="Networking\Data\BestPosPacket.cs" />
+    <Compile Include="Networking\Data\PortIndentifier.cs" />
+    <Compile Include="Networking\DefaultPacketRouter.cs" />
+    <Compile Include="Networking\IIncomingPacketProcessor.cs" />
+    <Compile Include="Networking\IOutgoingPacketFactory.cs" />
+    <Compile Include="Networking\LogPacketFactory.cs" />
+    <Compile Include="Networking\Packet.cs" />
+    <Compile Include="Networking\PacketFormat.cs" />
+    <Compile Include="Networking\PacketReader.cs" />
+    <Compile Include="Networking\PacketRouter.cs" />
+    <Compile Include="Networking\PacketRouterFactory.cs" />
+    <Compile Include="Networking\PacketWriter.cs" />
+    <Compile Include="Networking\Processors\BestPosProcesssor.cs" />
+    <Compile Include="Networking\TransferBuffer.cs" />
+    <Compile Include="NovatelException.cs" />
     <Compile Include="NovatelFacade.cs" />
+    <Compile Include="PacketException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utilities\BigEndianBitConverter.cs" />
+    <Compile Include="Utilities\EndianBinaryReader.cs" />
+    <Compile Include="Utilities\EndianBinaryWriter.cs" />
+    <Compile Include="Utilities\EndianBitConverter.cs" />
+    <Compile Include="Utilities\LittleEndianBitConverter.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
