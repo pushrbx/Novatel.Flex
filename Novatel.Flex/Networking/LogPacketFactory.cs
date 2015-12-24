@@ -6,7 +6,16 @@ using System.Threading.Tasks;
 
 namespace Novatel.Flex.Networking
 {
-    class LogPacketFactory : IOutgoingPacketFactory
+    internal class LogPacketFactory : IOutgoingPacketFactory
     {
+        public void Run()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Packet CreatePacket()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

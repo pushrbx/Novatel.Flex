@@ -30,6 +30,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Crc32, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Crc32.1.0.0\lib\net45\Crc32.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -40,20 +44,27 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\BestPosition.cs" />
+    <Compile Include="Data\INovatelData.cs" />
     <Compile Include="DeviceClient.cs" />
+    <Compile Include="LogType.cs" />
+    <Compile Include="Networking\Adapter.cs" />
     <Compile Include="Networking\Data\BestPosPacket.cs" />
     <Compile Include="Networking\Data\PortIndentifier.cs" />
     <Compile Include="Networking\DefaultPacketRouter.cs" />
     <Compile Include="Networking\IIncomingPacketProcessor.cs" />
     <Compile Include="Networking\IOutgoingPacketFactory.cs" />
+    <Compile Include="Networking\IPacketProcessor.cs" />
     <Compile Include="Networking\LogPacketFactory.cs" />
     <Compile Include="Networking\Packet.cs" />
     <Compile Include="Networking\PacketFormat.cs" />
     <Compile Include="Networking\PacketReader.cs" />
     <Compile Include="Networking\PacketRouter.cs" />
+    <Compile Include="Networking\PacketRouterException.cs" />
     <Compile Include="Networking\PacketRouterFactory.cs" />
     <Compile Include="Networking\PacketWriter.cs" />
     <Compile Include="Networking\Processors\BestPosProcesssor.cs" />
+    <Compile Include="Networking\Processors\LogCommandProcessor.cs" />
+    <Compile Include="Networking\Processors\LogRequest.cs" />
     <Compile Include="Networking\TransferBuffer.cs" />
     <Compile Include="NovatelException.cs" />
     <Compile Include="NovatelFacade.cs" />
@@ -65,7 +76,9 @@
     <Compile Include="Utilities\EndianBitConverter.cs" />
     <Compile Include="Utilities\LittleEndianBitConverter.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Novatel.Flex.Networking
+namespace Novatel.Flex.Data
 {
-    internal interface IOutgoingPacketFactory : IPacketProcessor
+    public interface INovatelData
     {
-        Packet CreatePacket();
     }
 }

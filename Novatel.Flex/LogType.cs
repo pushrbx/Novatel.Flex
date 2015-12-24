@@ -8,6 +8,7 @@ namespace Novatel.Flex
 {
     public enum LogType : ushort
     {
+        Log = 1,
         /// <summary>
         /// List of system logs
         /// </summary>

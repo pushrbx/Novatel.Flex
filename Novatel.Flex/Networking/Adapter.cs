@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using Crc32;
 
 namespace Novatel.Flex.Networking
@@ -31,7 +32,7 @@ namespace Novatel.Flex.Networking
             if (!isIncoming)
             {
                 var bytes = data.GetBytes();
-                data.WriteInt16((ushort) Crc32Algorithm.Compute(bytes));
+                data.WriteUInt32(Crc32Algorithm.Compute(bytes));
             }
 
             return data;
@@ -108,7 +109,7 @@ namespace Novatel.Flex.Networking
         /// <remarks>
         ///     Call GetIncomingPackets to obtain a list of ready to process packets.
         /// </remarks>
-        public void Receive(TransferBuffer rawBuffer, bool isIncoming)
+        public void Receive(TransferBuffer rawBuffer, bool isIncoming = true)
         {
             var incomingBuffersTmp = new List<TransferBuffer>();
 
@@ -144,9 +145,17 @@ namespace Novatel.Flex.Networking
                                 break;
                             }
 
+                            // check if contains strings, if it does, drop the buffer
+                            var text = Encoding.ASCII.GetString(m_receiveBuffer.Buffer);
+
+                            if (text.Contains("#") && text.Contains(",") && text.Contains("-") && text.Contains("."))
+                            {
+                                length = 0;
+                                break;
+                            }
+
                             // Calculate the packet size. (Novatel FlexPak6 specific)
-                            var packetSize = ((m_receiveBuffer.Buffer[8] << 8) | m_receiveBuffer.Buffer[9]) +
-                                             m_receiveBuffer.Buffer[3] + 4; // the extra 4 is for the crc checksum
+                            var packetSize = CheckForPrefixAndGetPacketSize(m_receiveBuffer);
 
                             // the standard tcp one would be:
                             // int packetSize = m_receiveBuffer.Buffer[1] << 8 | m_receiveBuffer.Buffer[0];
@@ -191,29 +200,77 @@ namespace Novatel.Flex.Networking
                     }
                 }
 
+                // iterate the buffers if there's any
                 if (incomingBuffersTmp.Count > 0)
                 {
                     foreach (var buffer in incomingBuffersTmp)
                     {
-                        var packetSize = ((buffer.Buffer[8] << 8) | buffer.Buffer[9]) + buffer.Buffer[3] + 4;
+                        var packetSize = CheckForPrefixAndGetPacketSize(buffer);
 
+                        // todo: check if we have multiple packets in one buffer.
                         var packet = new Packet((ushort) ((buffer.Buffer[4] << 8) | buffer.Buffer[5]), buffer.Buffer, 0,
                             packetSize, m_portIdentifier) {IsIncoming = isIncoming};
 
                         packet.Lock();
 
-                        // todo: do crc check on the packet, if it fails, dont add it.
-
-                        m_incomingPackets.Add(packet);
+                        // crc check on the packet, if it fails, dont add it.
+                        if (ValidateIncomingPacket(packet))
+                            m_incomingPackets.Add(packet);
                     }
                 }
+            }
+        }
+
+        private static int CheckForPrefixAndGetPacketSize(TransferBuffer buffer)
+        {
+            var prefixAr = new byte[7];
+            Buffer.BlockCopy(buffer.Buffer, 0, prefixAr, 0, 7);
+            var prefix = Encoding.ASCII.GetString(prefixAr);
+            if (prefix.Contains("ICOM"))
+            {
+                var oldBuffer = buffer.Buffer;
+                buffer.Buffer = new byte[oldBuffer.Length - 7];
+                Buffer.BlockCopy(oldBuffer, 7, buffer.Buffer, 0, buffer.Buffer.Length);
+                return ((buffer.Buffer[8] << 8) | buffer.Buffer[9]) + buffer.Buffer[3] + sizeof(int);
+            }
+
+            return ((buffer.Buffer[8] << 8) | buffer.Buffer[9]) + buffer.Buffer[3] + sizeof(int);
+        }
+
+        private static bool ValidateIncomingPacket(Packet packet)
+        {
+            try
+            {
+                var packetSize = packet.GetHeaderLength() + packet.GetMessageLength() + sizeof (int);
+                var checkSumOffset = packetSize - sizeof (int);
+                var bytes = packet.GetBytes();
+                var theirChecksum = (uint)((bytes[checkSumOffset] << 24) | (bytes[checkSumOffset + 1] << 16) |
+                                     (bytes[checkSumOffset + 2] << 8) | bytes[checkSumOffset + 3]);
+
+                var bytesWithoutChecksum = new byte[checkSumOffset];
+                Buffer.BlockCopy(bytes, 0, bytesWithoutChecksum, 0, checkSumOffset);
+                var ourChecksum = Crc32Algorithm.Compute(bytesWithoutChecksum);
+
+                return ourChecksum == theirChecksum;
+            }
+            catch (InvalidOperationException)
+            {
+                return false;
+            }
+            catch (IndexOutOfRangeException)
+            {
+                return false;
+            }
+            catch (ArgumentException)
+            {
+                return false;
             }
         }
 
         /// <summary>
         ///     Transfers raw incoming data into the adapter object.
         /// </summary>
-        public void Receive(byte[] buffer, int offset, int length, bool isIncoming)
+        public void Receive(byte[] buffer, int offset, int length, bool isIncoming = true)
         {
             Receive(new TransferBuffer(buffer, offset, length, true), isIncoming);
         }

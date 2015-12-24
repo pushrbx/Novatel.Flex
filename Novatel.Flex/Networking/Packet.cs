@@ -26,6 +26,8 @@ namespace Novatel.Flex.Networking
         private PacketReader m_reader;
         private byte[] m_readerBytes;
 
+        private bool m_headerSet = false;
+
         private PacketWriter m_writer;
 
         /// <summary>
@@ -45,6 +47,7 @@ namespace Novatel.Flex.Networking
             PortAddress = portIdentifier;
             Sequence = 0;
             MessageType = 0x2;
+            SetHeader();
         }
 
         /// <summary>
@@ -114,6 +117,16 @@ namespace Novatel.Flex.Networking
             MessageType = 0x2;
         }
 
+        private void SetHeader()
+        {
+            m_writer.Seek(0, SeekOrigin.Begin);
+            var headerBytes = GetHeaderBytes(8192);
+            m_writer.Write(m_syncBytes);
+            m_writer.Write((byte)headerBytes.Length);
+            m_writer.Write(headerBytes);
+            m_headerSet = true;
+        }
+
         public ushort MessageId { get; private set; }
 
         /// <summary>
@@ -165,6 +178,19 @@ namespace Novatel.Flex.Networking
             }
         }
 
+        internal int GetMessageLength()
+        {
+            var bytes = GetBytes();
+
+            return (bytes[8] << 8) | bytes[9];
+        }
+
+        internal byte GetHeaderLength()
+        {
+            var bytes = GetBytes();
+            return bytes[3];
+        }
+
         private void CheckIfLocked(string operation)
         {
             if (m_locked)
@@ -193,7 +219,7 @@ namespace Novatel.Flex.Networking
             lock (m_lock)
             {
                 var bytes = m_locked ? m_readerBytes : m_writer.GetBytes();
-                if (!m_locked)
+                if (!m_locked && !m_headerSet)
                 {
                     m_writer.Seek(0, SeekOrigin.Begin);
                     var headerBytes = GetHeaderBytes(8192);

@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Novatel.Flex.Networking
+﻿namespace Novatel.Flex.Networking
 {
-    interface IIncomingPacketProcessor
+    internal interface IIncomingPacketProcessor : IPacketProcessor
     {
+        void Process(Packet p);
     }
 }
